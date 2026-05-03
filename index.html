@@ -1,0 +1,1496 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#030407">
+  <link rel="icon" href="data:,">
+  <title>Liquid Glass Parallax | Bles Software</title>
+  <meta name="description" content="A live Three.js liquid glass interface demo by Bles Software, built with Telecladius.">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f8f8fb;
+      --muted: rgba(248, 248, 251, 0.64);
+      --line: rgba(255, 255, 255, 0.14);
+      --panel: rgba(10, 13, 20, 0.58);
+      --field: rgba(255, 255, 255, 0.08);
+      --accent: #8edbff;
+      --accent-strong: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #030407;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+      touch-action: none;
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 2;
+      cursor: grab;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    #stage:active {
+      cursor: grabbing;
+    }
+
+    .source {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 0;
+      background:
+        linear-gradient(180deg, #030407 0%, #070910 52%, #030407 100%);
+      pointer-events: none;
+    }
+
+    .copy {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      width: 100%;
+      text-align: center;
+    }
+
+    .copy h1 {
+      margin: 0;
+      max-width: min(1180px, 90vw);
+      font-size: clamp(4.2rem, 8.8vw, 10rem);
+      line-height: 0.9;
+      font-weight: 900;
+      color: rgba(248, 249, 253, 0.96);
+      text-shadow: 0 0 34px rgba(255, 255, 255, 0.2);
+    }
+
+    .fallback {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background: #030407;
+      color: var(--muted);
+      text-align: center;
+      z-index: 5;
+    }
+
+    .fallback div {
+      width: min(430px, 100%);
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      line-height: 1.5;
+    }
+
+    .fallback strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 1.05rem;
+    }
+
+    .site-nav {
+      position: fixed;
+      top: clamp(14px, 3vw, 28px);
+      left: clamp(16px, 4vw, 44px);
+      right: clamp(16px, 4vw, 44px);
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      pointer-events: none;
+      font-size: 0.86rem;
+      color: rgba(248, 248, 251, 0.78);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .site-nav a,
+    .launch-actions a,
+    .github-link {
+      pointer-events: auto;
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .site-nav a {
+      padding: 9px 12px;
+    }
+
+    .launch-copy {
+      position: fixed;
+      left: clamp(18px, 6vw, 72px);
+      bottom: clamp(18px, 5vh, 52px);
+      z-index: 4;
+      width: min(460px, calc(100vw - 36px));
+      padding: clamp(14px, 2.4vw, 20px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.055) 52%, rgba(142, 219, 255, 0.08)),
+        rgba(8, 11, 18, 0.34);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -18px 44px rgba(142, 219, 255, 0.07),
+        0 18px 70px rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(18px) saturate(145%);
+      pointer-events: auto;
+      overflow: hidden;
+    }
+
+    .launch-copy::before {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 7px;
+      background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.22), transparent 28%),
+        linear-gradient(295deg, rgba(142, 219, 255, 0.13), transparent 34%);
+      opacity: 0.86;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .launch-copy > * {
+      position: relative;
+    }
+
+    .launch-copy p {
+      margin: 0 0 12px;
+      color: rgba(248, 248, 251, 0.68);
+      font-size: clamp(0.82rem, 1.5vw, 0.96rem);
+    }
+
+    .launch-copy h2 {
+      margin: 0;
+      max-width: 14ch;
+      font-size: clamp(1.82rem, 4.8vw, 3.85rem);
+      line-height: 0.94;
+      color: rgba(255, 255, 255, 0.96);
+    }
+
+    .launch-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .launch-actions a {
+      padding: 11px 14px;
+      font-size: 0.92rem;
+    }
+
+    .contact-panel {
+      position: fixed;
+      right: clamp(18px, 5vw, 72px);
+      bottom: clamp(24px, 8vh, 82px);
+      z-index: 4;
+      width: min(396px, calc(100vw - 36px));
+      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+        var(--panel);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      backdrop-filter: blur(22px) saturate(130%);
+      pointer-events: auto;
+      touch-action: pan-y;
+    }
+
+    .contact-panel * {
+      letter-spacing: 0;
+    }
+
+    .panel-kicker {
+      margin-bottom: 8px;
+      color: rgba(142, 219, 255, 0.92);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .contact-panel h3 {
+      margin: 0;
+      color: var(--accent-strong);
+      font-size: clamp(1.18rem, 2vw, 1.46rem);
+      line-height: 1.08;
+    }
+
+    .contact-panel p {
+      margin: 8px 0 14px;
+      color: rgba(248, 248, 251, 0.68);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .lead-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .lead-form label {
+      display: grid;
+      gap: 6px;
+      color: rgba(248, 248, 251, 0.72);
+      font-size: 0.76rem;
+      font-weight: 650;
+    }
+
+    .lead-form input,
+    .lead-form select,
+    .lead-form textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 6px;
+      background: var(--field);
+      color: #fff;
+      outline: none;
+      padding: 10px 11px;
+      font: inherit;
+      font-size: 0.88rem;
+      user-select: text;
+      -webkit-user-select: text;
+      touch-action: manipulation;
+    }
+
+    .lead-form textarea {
+      min-height: 78px;
+      resize: vertical;
+      touch-action: pan-y;
+    }
+
+    .lead-form input::placeholder,
+    .lead-form textarea::placeholder {
+      color: rgba(248, 248, 251, 0.38);
+    }
+
+    .lead-form input:focus,
+    .lead-form select:focus,
+    .lead-form textarea:focus {
+      border-color: rgba(142, 219, 255, 0.72);
+      box-shadow: 0 0 0 3px rgba(142, 219, 255, 0.14);
+    }
+
+    .lead-form button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #ffffff, #9fe4ff);
+      color: #05070b;
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .lead-form button:disabled {
+      opacity: 0.68;
+      cursor: wait;
+    }
+
+    .form-status {
+      min-height: 18px;
+      margin: 0;
+      color: rgba(248, 248, 251, 0.74);
+      font-size: 0.78rem;
+    }
+
+    .bot-field {
+      position: absolute;
+      left: -10000px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .github-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 12px;
+      padding: 10px 12px;
+      font-size: 0.86rem;
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    body.no-webgl #stage {
+      display: none;
+    }
+
+    body.no-webgl .fallback {
+      display: grid;
+    }
+
+    @media (max-width: 760px) {
+      .copy {
+        padding: 0 18px;
+        transform: translateY(-4vh);
+      }
+
+      .copy h1 {
+        max-width: 96vw;
+        font-size: clamp(2.25rem, 8.7vw, 3.1rem);
+        white-space: nowrap;
+      }
+
+      .site-nav {
+        top: 12px;
+        left: 14px;
+        right: 14px;
+      }
+
+      .nav-links {
+        gap: 8px;
+      }
+
+      .site-nav a {
+        padding: 8px 9px;
+        font-size: 0.78rem;
+      }
+
+      .launch-copy {
+        top: 86px;
+        bottom: auto;
+        left: 16px;
+        width: calc(100vw - 36px);
+        padding: 12px;
+      }
+
+      .launch-copy p {
+        margin-bottom: 8px;
+      }
+
+      .launch-copy h2 {
+        max-width: 16ch;
+        font-size: clamp(1.42rem, 7.8vw, 2.25rem);
+      }
+
+      .launch-actions {
+        margin-top: 12px;
+      }
+
+      .launch-actions a {
+        padding: 10px 12px;
+        font-size: 0.86rem;
+      }
+
+      .contact-panel {
+        left: 14px;
+        right: 14px;
+        bottom: 12px;
+        width: auto;
+        max-height: 51vh;
+        padding: 14px;
+        overflow-y: auto;
+      }
+
+      .contact-panel h3 {
+        font-size: 1.1rem;
+      }
+
+      .contact-panel p {
+        display: none;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+        gap: 9px;
+      }
+
+      .lead-form {
+        gap: 9px;
+      }
+
+      .lead-form input,
+      .lead-form select,
+      .lead-form textarea {
+        min-height: 39px;
+        padding: 8px 10px;
+        font-size: 0.84rem;
+      }
+
+      .lead-form textarea {
+        min-height: 58px;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Bles Software">
+    <span>Bles Software</span>
+    <div class="nav-links">
+      <a href="https://github.com/stas4000/liquid-glass-paralax" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+  <div class="source" id="source" aria-hidden="true">
+    <div class="copy">
+      <h1>Bles Software Design</h1>
+    </div>
+  </div>
+
+  <canvas id="stage" aria-label="Fractured liquid glass revealing static typography"></canvas>
+  <section class="launch-copy" aria-label="Liquid glass parallax">
+    <p>Built with Telecladius on Three.js</p>
+    <h2>Liquid glass for modern web interfaces.</h2>
+    <div class="launch-actions">
+      <a href="#contact">Start a project</a>
+      <a href="https://github.com/stas4000/liquid-glass-paralax" target="_blank" rel="noreferrer">Open source code</a>
+    </div>
+  </section>
+  <aside class="contact-panel" id="contact" aria-label="Contact Bles Software">
+    <div class="panel-kicker">Bles Software build desk</div>
+    <h3>Want this kind of interface or automation?</h3>
+    <p>Tell us what you want to build. We handle liquid glass interfaces, AI integrations, Teleclaudious access, and custom build orders.</p>
+    <form class="lead-form" id="lead-form">
+      <label class="bot-field">
+        <span>Website</span>
+        <input name="website" autocomplete="off" tabindex="-1">
+      </label>
+      <div class="field-row">
+        <label>
+          <span>Name</span>
+          <input name="name" autocomplete="name" placeholder="Your name" required>
+        </label>
+        <label>
+          <span>Email or phone</span>
+          <input name="contact" autocomplete="email" placeholder="How to reach you" required>
+        </label>
+      </div>
+      <label>
+        <span>Inquiry</span>
+        <select name="inquiryType" required>
+          <option value="liquid-glass">Liquid glass interface</option>
+          <option value="ai-integrations">AI integrations</option>
+          <option value="teleclaudious-access">Teleclaudious access</option>
+          <option value="custom-build">Custom build order</option>
+        </select>
+      </label>
+      <label>
+        <span>Project details</span>
+        <textarea name="details" placeholder="A few words about the project, timeline, or stack." required></textarea>
+      </label>
+      <button type="submit">Send request</button>
+      <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+    </form>
+    <a class="github-link" href="https://github.com/stas4000/liquid-glass-paralax" target="_blank" rel="noreferrer">Grab the open-source repo</a>
+  </aside>
+  <div class="fallback">
+    <div>
+      <strong>GPU glass unavailable</strong>
+      This browser could not start the live refractive typography scene.
+    </div>
+  </div>
+
+  <script>
+    const leadForm = document.getElementById('lead-form');
+    const leadStatus = document.getElementById('form-status');
+
+    leadForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const submitButton = leadForm.querySelector('button[type="submit"]');
+      const data = Object.fromEntries(new FormData(leadForm).entries());
+      const contact = String(data.contact || '').trim();
+      if (contact.includes('@')) data.email = contact;
+      else data.phone = contact;
+      data.source = 'telecladius-liquid-glass';
+      data.page = window.location.href;
+
+      leadStatus.textContent = 'Sending...';
+      submitButton.disabled = true;
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.error || 'Request failed');
+        }
+        leadForm.reset();
+        leadStatus.textContent = 'Received. We will get back to you shortly.';
+      } catch (error) {
+        leadStatus.textContent = 'Could not send here. Email info@bles-software.com.';
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { Delaunay } from 'https://cdn.jsdelivr.net/npm/d3-delaunay@6/+esm';
+
+    const canvas = document.getElementById('stage');
+    const source = document.getElementById('source');
+    const mobileQuery = matchMedia('(max-width: 760px), (pointer: coarse)');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pointer = new THREE.Vector2(0.16, 0.04);
+    const pointerTarget = new THREE.Vector2(0.16, 0.04);
+    const previousPointerTarget = new THREE.Vector2(0.16, 0.04);
+    const pointerVelocity = new THREE.Vector2();
+    const pointerWorld = new THREE.Vector2();
+    const clock = new THREE.Clock();
+    const textZ = -3.08;
+    const panes = [];
+    const splinters = [];
+    const shockRings = [];
+    let isMobile = mobileQuery.matches;
+    let rasterTimer = 0;
+    let motionEnergy = 0;
+    let lastBurstAt = -1;
+    let splinterCursor = 0;
+    let shockCursor = 0;
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: !isMobile,
+        alpha: false,
+        powerPreference: 'high-performance',
+        preserveDrawingBuffer: true
+      });
+    } catch (error) {
+      document.body.classList.add('no-webgl');
+      throw error;
+    }
+
+    renderer.setPixelRatio(pixelRatio());
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+    if ('transmissionResolutionScale' in renderer) {
+      renderer.transmissionResolutionScale = isMobile ? 0.88 : 1;
+    }
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030407);
+    scene.environment = createEnvironmentMap();
+
+    const camera = new THREE.PerspectiveCamera(isMobile ? 39 : 34, window.innerWidth / window.innerHeight, 0.1, 80);
+    camera.position.set(0, 0, cameraDistance());
+
+    const rig = new THREE.Group();
+    scene.add(rig);
+
+    const textRig = new THREE.Group();
+    rig.add(textRig);
+
+    const backdrop = createBackdrop();
+    textRig.add(backdrop.mesh);
+
+    const lightBands = createLightBands();
+    rig.add(lightBands);
+
+    let glassRig = createGlassRig();
+    applyGlassLayout();
+    rig.add(glassRig);
+    const shatterRig = new THREE.Group();
+    rig.add(shatterRig);
+    updateDiagnostics();
+
+    scene.add(new THREE.HemisphereLight(0xe8f0ff, 0x07040b, 1.1));
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.4);
+    keyLight.position.set(-3.8, 4.4, 5.6);
+    scene.add(keyLight);
+
+    const edgeLight = new THREE.PointLight(0x8bdcff, 14, 12);
+    edgeLight.position.set(3.1, 1.4, 3.4);
+    scene.add(edgeLight);
+
+    const warmLight = new THREE.PointLight(0xffc8a8, 7, 12);
+    warmLight.position.set(-4.4, -2.2, 3.2);
+    scene.add(warmLight);
+
+    const composer = createPipeline();
+
+    updateBackdropLayout();
+    drawFallbackBackdrop();
+    rasterizeDomBackdrop();
+
+    window.addEventListener('pointermove', (event) => updatePointer(event.clientX, event.clientY), { passive: true });
+    window.addEventListener('pointerdown', (event) => updatePointer(event.clientX, event.clientY), { passive: true });
+    window.addEventListener('touchmove', (event) => {
+      if (event.touches[0]) updatePointer(event.touches[0].clientX, event.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('resize', resize);
+    mobileQuery.addEventListener?.('change', resize);
+
+    requestAnimationFrame(render);
+
+    function createBackdrop() {
+      const textureCanvas = document.createElement('canvas');
+      const texture = new THREE.CanvasTexture(textureCanvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy?.() || 1);
+
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        depthWrite: true,
+        depthTest: true
+      });
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+      mesh.position.z = textZ;
+      mesh.renderOrder = -4;
+      return { canvas: textureCanvas, texture, mesh };
+    }
+
+    async function rasterizeDomBackdrop() {
+      if (!window.html2canvas || !source) return;
+      try {
+        const captured = await window.html2canvas(source, {
+          backgroundColor: null,
+          logging: false,
+          scale: Math.min(window.devicePixelRatio || 1, isMobile ? 1.35 : 1.8),
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
+        const ctx = backdrop.canvas.getContext('2d');
+        backdrop.canvas.width = captured.width;
+        backdrop.canvas.height = captured.height;
+        ctx.clearRect(0, 0, backdrop.canvas.width, backdrop.canvas.height);
+        ctx.drawImage(captured, 0, 0);
+        backdrop.texture.needsUpdate = true;
+      } catch (error) {
+        drawFallbackBackdrop();
+      }
+    }
+
+    function drawFallbackBackdrop() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.8);
+      const width = Math.max(900, Math.round(window.innerWidth * dpr));
+      const height = Math.max(720, Math.round(window.innerHeight * dpr));
+      const ctx = backdrop.canvas.getContext('2d');
+      backdrop.canvas.width = width;
+      backdrop.canvas.height = height;
+
+      const base = ctx.createLinearGradient(0, 0, width, height);
+      base.addColorStop(0, '#030407');
+      base.addColorStop(0.5, '#080b12');
+      base.addColorStop(1, '#030407');
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, width, height);
+
+      const text = 'Bles Software Design';
+      let fontSize = Math.floor(Math.min(width / 7.4, height / 3.8));
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `900 ${fontSize}px Inter, system-ui, sans-serif`;
+      while (ctx.measureText(text).width > width * 0.86 && fontSize > 44) {
+        fontSize -= 4;
+        ctx.font = `900 ${fontSize}px Inter, system-ui, sans-serif`;
+      }
+      ctx.shadowColor = 'rgba(255,255,255,0.25)';
+      ctx.shadowBlur = fontSize * 0.12;
+      ctx.fillStyle = 'rgba(248,249,253,0.94)';
+      ctx.fillText(text, width * 0.5, height * 0.5);
+      backdrop.texture.needsUpdate = true;
+    }
+
+    function createLightBands() {
+      const group = new THREE.Group();
+      const specs = [
+        [-2.8, 1.45, -1.78, 3.2, 0.035, 0.13, 0x9edaff, 0.24],
+        [2.7, -1.24, -1.76, 3.0, 0.032, -0.1, 0xffd1b5, 0.18],
+        [0.0, 2.05, -1.82, 5.2, 0.026, 0.02, 0xffffff, 0.13],
+        [-0.55, -1.92, -1.8, 4.2, 0.024, -0.03, 0xc7f6ff, 0.1]
+      ];
+      specs.forEach(([x, y, z, w, h, r, color, opacity]) => {
+        const material = new THREE.MeshBasicMaterial({
+          color,
+          transparent: true,
+          opacity,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), material);
+        mesh.position.set(x, y, z);
+        mesh.rotation.z = r;
+        group.add(mesh);
+      });
+      return group;
+    }
+
+    function createGlassRig() {
+      const group = new THREE.Group();
+      panes.length = 0;
+      const specs = fractureSpecs();
+      specs.forEach((spec, index) => {
+        const pane = new THREE.Group();
+        const geometry = shardGeometry(spec);
+        const mesh = new THREE.Mesh(geometry, glassMaterial(spec));
+        mesh.renderOrder = 4 + index;
+        pane.add(mesh);
+        const edgeMaterials = addEdges(pane, geometry, spec);
+        pane.position.copy(spec.position);
+        pane.rotation.set(spec.rotation.x, spec.rotation.y, spec.rotation.z);
+        pane.userData = {
+          basePosition: spec.position.clone(),
+          baseRotation: spec.rotation.clone(),
+          phase: spec.phase,
+          speed: reducedMotion ? 0.12 : spec.speed,
+          drift: spec.drift,
+          radial: spec.radial,
+          rotationDrift: spec.rotationDrift,
+          pointerWeight: spec.pointerWeight,
+          glassMaterial: mesh.material,
+          edgeMaterials,
+          baseOpacity: mesh.material.opacity,
+          baseRoughness: mesh.material.roughness,
+          shatter: 0
+        };
+        panes.push(pane);
+        group.add(pane);
+      });
+      return group;
+    }
+
+    function fractureSpecs() {
+      const layout = isMobile
+        ? { width: 4.72, height: 8.08, columns: 6, rows: 9, seed: 8143 }
+        : { width: 9.7, height: 5.78, columns: 9, rows: 6, seed: 5297 };
+      const rng = seededRandom(layout.seed);
+      const points = [];
+      const cellWidth = layout.width / layout.columns;
+      const cellHeight = layout.height / layout.rows;
+
+      for (let row = 0; row < layout.rows; row += 1) {
+        for (let col = 0; col < layout.columns; col += 1) {
+          const centerPull = 1 - Math.min(0.62, Math.hypot(
+            (col + 0.5) / layout.columns - 0.5,
+            (row + 0.5) / layout.rows - 0.5
+          ));
+          const jitterX = (rng() - 0.5) * cellWidth * (0.58 + centerPull * 0.16);
+          const jitterY = (rng() - 0.5) * cellHeight * (0.58 + centerPull * 0.16);
+          points.push([
+            (col + 0.5) * cellWidth + jitterX,
+            (row + 0.5) * cellHeight + jitterY
+          ]);
+        }
+      }
+
+      const delaunay = Delaunay.from(points);
+      const voronoi = delaunay.voronoi([0, 0, layout.width, layout.height]);
+      const specs = [];
+
+      for (let index = 0; index < points.length; index += 1) {
+        const cell = voronoi.cellPolygon(index);
+        if (!cell || cell.length < 4) continue;
+        const worldPoints = cell
+          .slice(0, -1)
+          .map(([x, y]) => [x - layout.width / 2, layout.height / 2 - y]);
+        const area = Math.abs(polygonArea(worldPoints));
+        if (area < 0.034) continue;
+
+        const centroid = polygonCentroid(worldPoints);
+        const radial = new THREE.Vector2(centroid.x, centroid.y);
+        const radialLength = Math.max(radial.length(), 0.001);
+        radial.divideScalar(radialLength);
+        const gapScale = isMobile ? 0.946 : 0.954;
+        const localPoints = worldPoints.map(([x, y]) => [
+          (x - centroid.x) * gapScale,
+          (y - centroid.y) * gapScale
+        ]);
+        const outward = 0.046 + rng() * (isMobile ? 0.08 : 0.105);
+        const depthLift = (area / (layout.width * layout.height)) * (isMobile ? 1.12 : 1.42);
+        const phase = index * 0.71 + rng() * 4;
+
+        specs.push({
+          points: localPoints,
+          depth: 0.18 + rng() * 0.1,
+          bevel: Math.min(isMobile ? 0.088 : 0.108, Math.sqrt(area) * 0.095),
+          position: new THREE.Vector3(
+            centroid.x + radial.x * outward,
+            centroid.y + radial.y * outward,
+            0.28 + depthLift + rng() * 0.18
+          ),
+          rotation: new THREE.Euler(
+            (rng() - 0.5) * 0.074,
+            (rng() - 0.5) * 0.086,
+            (rng() - 0.5) * 0.052
+          ),
+          radial,
+          roughness: index % 7 === 0 ? 0.08 + rng() * 0.035 : 0.012 + rng() * 0.038,
+          thickness: 1.45 + rng() * 1.25,
+          phase,
+          speed: 0.28 + rng() * 0.16,
+          drift: new THREE.Vector3(0.02 + rng() * 0.026, 0.018 + rng() * 0.024, 0.068 + rng() * 0.092),
+          rotationDrift: new THREE.Vector3(0.016 + rng() * 0.026, 0.018 + rng() * 0.03, 0.008 + rng() * 0.016),
+          pointerWeight: 0.04 + rng() * 0.052
+        });
+      }
+
+      return specs;
+    }
+
+    function shardGeometry(spec) {
+      const shape = new THREE.Shape();
+      spec.points.forEach(([x, y], index) => {
+        if (index === 0) shape.moveTo(x, y);
+        else shape.lineTo(x, y);
+      });
+      shape.closePath();
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth: spec.depth,
+        bevelEnabled: true,
+        bevelThickness: spec.bevel,
+        bevelSize: spec.bevel,
+        bevelSegments: isMobile ? 7 : 11,
+        curveSegments: 2,
+        steps: 2
+      });
+      geometry.center();
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function seededRandom(seed) {
+      let value = seed >>> 0;
+      return () => {
+        value += 0x6D2B79F5;
+        let mixed = value;
+        mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
+        mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
+        return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function polygonArea(points) {
+      let area = 0;
+      for (let i = 0; i < points.length; i += 1) {
+        const next = points[(i + 1) % points.length];
+        area += points[i][0] * next[1] - next[0] * points[i][1];
+      }
+      return area * 0.5;
+    }
+
+    function polygonCentroid(points) {
+      const signedArea = polygonArea(points) || 1;
+      let x = 0;
+      let y = 0;
+      for (let i = 0; i < points.length; i += 1) {
+        const next = points[(i + 1) % points.length];
+        const factor = points[i][0] * next[1] - next[0] * points[i][1];
+        x += (points[i][0] + next[0]) * factor;
+        y += (points[i][1] + next[1]) * factor;
+      }
+      return new THREE.Vector2(x / (6 * signedArea), y / (6 * signedArea));
+    }
+
+    function glassMaterial(spec) {
+      const material = new THREE.MeshPhysicalMaterial({
+        color: 0xf7fbff,
+        metalness: 0,
+        roughness: spec.roughness,
+        transmission: 1,
+        thickness: spec.thickness,
+        ior: 1.55,
+        attenuationColor: new THREE.Color(0xe5f8ff),
+        attenuationDistance: 12,
+        clearcoat: 1,
+        clearcoatRoughness: Math.min(0.12, spec.roughness + 0.035),
+        specularIntensity: 1,
+        envMapIntensity: 2.1,
+        transparent: true,
+        opacity: 0.76,
+        side: THREE.DoubleSide
+      });
+      if ('dispersion' in material) material.dispersion = spec.roughness > 0.08 ? 1.65 : 2.75;
+      return material;
+    }
+
+    function addEdges(pane, geometry, spec) {
+      const edgeGeometry = new THREE.EdgesGeometry(geometry, 18);
+      const edge = new THREE.LineSegments(edgeGeometry, new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: spec.roughness > 0.08 ? 0.32 : 0.44,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      }));
+      pane.add(edge);
+
+      const cyan = new THREE.LineSegments(edgeGeometry.clone(), new THREE.LineBasicMaterial({
+        color: 0x72e8ff,
+        transparent: true,
+        opacity: 0.18,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      }));
+      cyan.position.set(0.008, -0.002, -0.008);
+      pane.add(cyan);
+
+      const red = new THREE.LineSegments(edgeGeometry.clone(), new THREE.LineBasicMaterial({
+        color: 0xff6f8d,
+        transparent: true,
+        opacity: 0.14,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      }));
+      red.position.set(-0.009, 0.003, 0.006);
+      pane.add(red);
+
+      return {
+        white: edge.material,
+        cyan: cyan.material,
+        red: red.material,
+        whiteBase: edge.material.opacity,
+        cyanBase: cyan.material.opacity,
+        redBase: red.material.opacity
+      };
+    }
+
+    function createCinematicShatterRig() {
+      const group = new THREE.Group();
+      const splinterCount = isMobile ? 20 : 30;
+      for (let index = 0; index < splinterCount; index += 1) {
+        const piece = new THREE.Group();
+        const geometry = splinterGeometry(index);
+        const material = splinterMaterial(index);
+        const mesh = new THREE.Mesh(geometry, material);
+        const edgeMaterial = new THREE.LineBasicMaterial({
+          color: index % 3 === 0 ? 0xff88a5 : 0x8eefff,
+          transparent: true,
+          opacity: 0,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const edge = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 12), edgeMaterial);
+        mesh.renderOrder = 90 + index;
+        edge.renderOrder = 91 + index;
+        piece.add(mesh, edge);
+        piece.visible = false;
+        piece.userData = {
+          active: false,
+          age: 0,
+          life: 1,
+          opacity: 0,
+          velocity: new THREE.Vector3(),
+          spin: new THREE.Vector3(),
+          material,
+          edgeMaterial,
+          baseScale: 0.78 + (index % 5) * 0.08
+        };
+        splinters.push(piece);
+        group.add(piece);
+      }
+
+      for (let index = 0; index < 5; index += 1) {
+        const material = new THREE.MeshBasicMaterial({
+          color: index % 2 === 0 ? 0xbdf8ff : 0xffb9c8,
+          transparent: true,
+          opacity: 0,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.212, 96), material);
+        ring.visible = false;
+        ring.renderOrder = 80 + index;
+        ring.userData = { active: false, age: 0, life: 0.72, intensity: 0 };
+        shockRings.push(ring);
+        group.add(ring);
+      }
+
+      return group;
+    }
+
+    function splinterGeometry(index) {
+      const rng = seededRandom(16000 + index * 53);
+      const radius = 0.075 + rng() * 0.085;
+      const skew = 0.55 + rng() * 0.82;
+      const shape = new THREE.Shape();
+      shape.moveTo(Math.cos(-1.55) * radius, Math.sin(-1.55) * radius * skew);
+      shape.lineTo(Math.cos(0.55 + rng() * 0.28) * radius * (0.72 + rng() * 0.45), Math.sin(0.55) * radius);
+      shape.lineTo(Math.cos(2.45 + rng() * 0.2) * radius * (0.72 + rng() * 0.5), Math.sin(2.45) * radius * (0.68 + rng() * 0.5));
+      shape.closePath();
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth: 0.018 + rng() * 0.018,
+        bevelEnabled: true,
+        bevelThickness: 0.008,
+        bevelSize: 0.008,
+        bevelSegments: 3,
+        curveSegments: 1,
+        steps: 1
+      });
+      geometry.center();
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function splinterMaterial(index) {
+      const material = new THREE.MeshPhysicalMaterial({
+        color: index % 4 === 0 ? 0xdff9ff : 0xffffff,
+        metalness: 0,
+        roughness: 0.018,
+        transmission: 1,
+        thickness: 0.58,
+        ior: 1.58,
+        attenuationColor: new THREE.Color(0xe6fbff),
+        attenuationDistance: 8,
+        clearcoat: 1,
+        clearcoatRoughness: 0.028,
+        specularIntensity: 1,
+        envMapIntensity: 2.6,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+      if ('dispersion' in material) material.dispersion = 3.1;
+      return material;
+    }
+
+    function createPipeline() {
+      const pipeline = new EffectComposer(renderer);
+      pipeline.setPixelRatio(pixelRatio());
+      pipeline.setSize(window.innerWidth, window.innerHeight);
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        isMobile ? 0.22 : 0.32,
+        isMobile ? 0.28 : 0.4,
+        0.86
+      );
+      const grainPass = new ShaderPass({
+        uniforms: {
+          tDiffuse: { value: null },
+          time: { value: 0 },
+          strength: { value: isMobile ? 0.03 : 0.024 }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D tDiffuse;
+          uniform float time;
+          uniform float strength;
+          varying vec2 vUv;
+
+          float noise(vec2 value) {
+            return fract(sin(dot(value + time, vec2(12.9898, 78.233))) * 43758.5453);
+          }
+
+          void main() {
+            vec4 color = texture2D(tDiffuse, vUv);
+            float grain = noise(vUv * vec2(1520.0, 940.0));
+            color.rgb += (grain - 0.5) * strength;
+            color.rgb = pow(max(color.rgb, vec3(0.0)), vec3(0.985));
+            gl_FragColor = color;
+          }
+        `
+      });
+      pipeline.addPass(new RenderPass(scene, camera));
+      pipeline.addPass(bloomPass);
+      pipeline.addPass(grainPass);
+      return { pipeline, bloomPass, grainPass };
+    }
+
+    function createEnvironmentMap() {
+      const envCanvas = document.createElement('canvas');
+      envCanvas.width = 1024;
+      envCanvas.height = 512;
+      const ctx = envCanvas.getContext('2d');
+      const base = ctx.createLinearGradient(0, 0, envCanvas.width, envCanvas.height);
+      base.addColorStop(0, '#020307');
+      base.addColorStop(0.18, '#ffffff');
+      base.addColorStop(0.24, '#7fdcff');
+      base.addColorStop(0.42, '#07101c');
+      base.addColorStop(0.58, '#ffffff');
+      base.addColorStop(0.64, '#ffc4a6');
+      base.addColorStop(0.82, '#0b0c12');
+      base.addColorStop(1, '#020307');
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, envCanvas.width, envCanvas.height);
+      ctx.globalCompositeOperation = 'screen';
+      for (let i = 0; i < 9; i += 1) {
+        const y = 36 + i * 52;
+        ctx.fillStyle = `rgba(255, 255, 255, ${i % 3 === 0 ? 0.22 : 0.1})`;
+        ctx.fillRect((i % 2) * 120, y, envCanvas.width * 0.72, 4 + (i % 3) * 2);
+      }
+      const texture = new THREE.CanvasTexture(envCanvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      const environment = pmrem.fromEquirectangular(texture).texture;
+      texture.dispose();
+      pmrem.dispose();
+      return environment;
+    }
+
+    function updateBackdropLayout() {
+      const viewport = viewportAtZ(textZ);
+      backdrop.mesh.geometry.dispose();
+      backdrop.mesh.geometry = new THREE.PlaneGeometry(viewport.width * 1.18, viewport.height * 1.18);
+      backdrop.mesh.position.set(0, 0, textZ);
+    }
+
+    function viewportAtZ(z) {
+      const distance = camera.position.z - z;
+      const height = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * distance;
+      return { width: height * camera.aspect, height };
+    }
+
+    function updateDiagnostics() {
+      window.__liquidGlassFracture = {
+        mode: 'voronoi-fracture-parallax-reveal',
+        shardCount: panes.length,
+        shardDensity: 'dense',
+        parallax: true,
+        pointerReveal: true
+      };
+      window.__liquidGlassRuntime = () => ({
+        activeSplinters: splinters.filter((piece) => piece.userData.active).length,
+        activeShockRings: shockRings.filter((ring) => ring.userData.active).length,
+        maxShatter: panes.reduce((max, pane) => Math.max(max, pane.userData.shatter || 0), 0),
+        motionEnergy
+      });
+    }
+
+    function updatePointerWorld() {
+      pointerWorld.set(
+        pointer.x * (isMobile ? 2.22 : 4.86),
+        pointer.y * (isMobile ? 3.86 : 2.84)
+      );
+      return pointerWorld;
+    }
+
+    function updatePointer(x, y) {
+      const nextX = (x / window.innerWidth) * 2 - 1;
+      const nextY = -(y / window.innerHeight) * 2 + 1;
+      pointerVelocity.set(nextX - previousPointerTarget.x, nextY - previousPointerTarget.y);
+      previousPointerTarget.set(nextX, nextY);
+      const speed = pointerVelocity.length();
+      motionEnergy = Math.max(motionEnergy, THREE.MathUtils.clamp(speed * (isMobile ? 6.2 : 8.4), 0, 1.25));
+      pointerTarget.set(nextX, nextY);
+    }
+
+    function pixelRatio() {
+      return Math.min(window.devicePixelRatio || 1, isMobile ? 1.35 : 1.9);
+    }
+
+    function cameraDistance() {
+      return isMobile ? 11.4 : 9.35;
+    }
+
+    function applyGlassLayout() {
+      glassRig.scale.setScalar(isMobile ? 0.96 : 1.025);
+      glassRig.position.set(isMobile ? 0.02 : 0, isMobile ? 0.08 : 0, 0.08);
+    }
+
+    function scheduleRaster() {
+      window.clearTimeout(rasterTimer);
+      rasterTimer = window.setTimeout(rasterizeDomBackdrop, 180);
+    }
+
+    function resize() {
+      const layoutChanged = mobileQuery.matches !== isMobile;
+      isMobile = mobileQuery.matches;
+      camera.fov = isMobile ? 39 : 34;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.position.z = cameraDistance();
+      camera.updateProjectionMatrix();
+      renderer.setPixelRatio(pixelRatio());
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.pipeline.setPixelRatio(pixelRatio());
+      composer.pipeline.setSize(window.innerWidth, window.innerHeight);
+      composer.bloomPass.setSize(window.innerWidth, window.innerHeight);
+      composer.grainPass.uniforms.strength.value = isMobile ? 0.03 : 0.024;
+      if ('transmissionResolutionScale' in renderer) renderer.transmissionResolutionScale = isMobile ? 0.88 : 1;
+      if (layoutChanged) rebuildGlassRig();
+      else applyGlassLayout();
+      updateBackdropLayout();
+      drawFallbackBackdrop();
+      scheduleRaster();
+    }
+
+    function rebuildGlassRig() {
+      rig.remove(glassRig);
+      disposeGroup(glassRig);
+      glassRig = createGlassRig();
+      applyGlassLayout();
+      rig.add(glassRig);
+      updateDiagnostics();
+    }
+
+    function disposeGroup(group) {
+      group.traverse((node) => {
+        if (node.geometry) node.geometry.dispose();
+        if (node.material) {
+          const materials = Array.isArray(node.material) ? node.material : [node.material];
+          materials.forEach((material) => material.dispose?.());
+        }
+      });
+    }
+
+    function triggerCinematicBurst(elapsed) {
+      return;
+    }
+
+    function spawnSplinters(origin, energy) {
+      const count = Math.ceil(THREE.MathUtils.lerp(isMobile ? 2 : 3, isMobile ? 6 : 8, energy));
+      const hasDirection = pointerVelocity.lengthSq() > 0.000008;
+      const travelAngle = hasDirection ? Math.atan2(pointerVelocity.y, pointerVelocity.x) : Math.random() * Math.PI * 2;
+
+      for (let index = 0; index < count; index += 1) {
+        const piece = splinters[splinterCursor % splinters.length];
+        splinterCursor += 1;
+        const data = piece.userData;
+        const spread = (Math.random() - 0.5) * 2.9;
+        const angle = travelAngle + spread;
+        const speed = (isMobile ? 0.18 : 0.24) + energy * (isMobile ? 0.36 : 0.52) + Math.random() * 0.16;
+        const jitter = isMobile ? 0.045 : 0.06;
+
+        data.active = true;
+        data.age = 0;
+        data.life = 1.05 + Math.random() * 0.85 + energy * 0.28;
+        data.opacity = 0.34 + energy * 0.38;
+        data.velocity.set(
+          Math.cos(angle) * speed,
+          Math.sin(angle) * speed,
+          0.18 + Math.random() * 0.24 + energy * 0.28
+        );
+        data.spin.set(
+          (Math.random() - 0.5) * (1.1 + energy * 1.7),
+          (Math.random() - 0.5) * (1.25 + energy * 1.9),
+          (Math.random() - 0.5) * (0.9 + energy * 1.3)
+        );
+
+        piece.position.set(
+          origin.x + (Math.random() - 0.5) * jitter,
+          origin.y + (Math.random() - 0.5) * jitter,
+          0.72 + Math.random() * 0.2
+        );
+        piece.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        piece.scale.setScalar(data.baseScale * (0.64 + Math.random() * 0.62));
+        data.material.opacity = data.opacity;
+        data.edgeMaterial.opacity = data.opacity * 0.7;
+        piece.visible = true;
+      }
+    }
+
+    function spawnShockHighlight(origin, energy) {
+      const ring = shockRings[shockCursor % shockRings.length];
+      shockCursor += 1;
+      ring.visible = true;
+      ring.position.set(origin.x, origin.y, 0.62);
+      ring.rotation.z = Math.random() * Math.PI;
+      ring.scale.setScalar(0.42 + energy * 0.18);
+      ring.userData.active = true;
+      ring.userData.age = 0;
+      ring.userData.life = 0.62 + energy * 0.22;
+      ring.userData.intensity = 0.18 + energy * 0.34;
+      ring.material.opacity = ring.userData.intensity;
+    }
+
+    function updateSplinters(dt) {
+      const slowDt = Math.min(dt, 0.034) * (reducedMotion ? 0.22 : 0.58);
+      splinters.forEach((piece) => {
+        const data = piece.userData;
+        if (!data.active) return;
+
+        data.age += slowDt;
+        const progress = data.age / data.life;
+        if (progress >= 1) {
+          data.active = false;
+          piece.visible = false;
+          data.material.opacity = 0;
+          data.edgeMaterial.opacity = 0;
+          return;
+        }
+
+        piece.position.addScaledVector(data.velocity, slowDt);
+        data.velocity.z -= slowDt * 0.08;
+        data.velocity.multiplyScalar(Math.max(0.94, 1 - slowDt * 0.42));
+        piece.rotation.x += data.spin.x * slowDt;
+        piece.rotation.y += data.spin.y * slowDt;
+        piece.rotation.z += data.spin.z * slowDt;
+
+        const fadeIn = THREE.MathUtils.smoothstep(progress, 0, 0.14);
+        const fadeOut = 1 - THREE.MathUtils.smoothstep(progress, 0.54, 1);
+        const opacity = data.opacity * fadeIn * fadeOut;
+        data.material.opacity = opacity;
+        data.edgeMaterial.opacity = opacity * 0.78;
+      });
+    }
+
+    function updateShockRings(dt) {
+      const slowDt = Math.min(dt, 0.034) * (reducedMotion ? 0.2 : 0.72);
+      shockRings.forEach((ring) => {
+        const data = ring.userData;
+        if (!data.active) return;
+
+        data.age += slowDt;
+        const progress = data.age / data.life;
+        if (progress >= 1) {
+          data.active = false;
+          ring.visible = false;
+          ring.material.opacity = 0;
+          return;
+        }
+
+        ring.scale.setScalar(0.44 + progress * (1.25 + data.intensity * 1.6));
+        ring.rotation.z += slowDt * 0.18;
+        ring.material.opacity = data.intensity * Math.pow(1 - progress, 2.4);
+      });
+    }
+
+    function updatePaneMaterials(data) {
+      const shatter = data.shatter;
+      data.glassMaterial.opacity = data.baseOpacity + shatter * 0.14;
+      data.glassMaterial.roughness = Math.min(0.14, data.baseRoughness + shatter * 0.048);
+      data.edgeMaterials.white.opacity = data.edgeMaterials.whiteBase + shatter * 0.34;
+      data.edgeMaterials.cyan.opacity = data.edgeMaterials.cyanBase + shatter * 0.22;
+      data.edgeMaterials.red.opacity = data.edgeMaterials.redBase + shatter * 0.2;
+    }
+
+    function render() {
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const elapsed = clock.elapsedTime;
+      pointer.lerp(pointerTarget, 0.075);
+      motionEnergy *= reducedMotion ? 0.9 : 0.955;
+      camera.position.x += (pointer.x * (isMobile ? 0.22 : 0.38) - camera.position.x) * 0.052;
+      camera.position.y += (-pointer.y * (isMobile ? 0.18 : 0.27) - camera.position.y) * 0.052;
+      camera.lookAt(0, 0, 0);
+
+      textRig.position.x += (-pointer.x * (isMobile ? 0.34 : 0.56) - textRig.position.x) * 0.055;
+      textRig.position.y += (pointer.y * (isMobile ? 0.24 : 0.36) - textRig.position.y) * 0.055;
+      textRig.position.z = Math.sin(elapsed * 0.28) * 0.018;
+      textRig.rotation.x += (pointer.y * (isMobile ? 0.018 : 0.028) - textRig.rotation.x) * 0.055;
+      textRig.rotation.y += (pointer.x * (isMobile ? 0.026 : 0.042) - textRig.rotation.y) * 0.055;
+
+      glassRig.rotation.x += (-pointer.y * (isMobile ? 0.045 : 0.064) - glassRig.rotation.x) * 0.048;
+      glassRig.rotation.y += (pointer.x * (isMobile ? 0.052 : 0.078) - glassRig.rotation.y) * 0.048;
+
+      updatePointerWorld();
+      triggerCinematicBurst(elapsed);
+      const revealRadius = isMobile ? 2.42 : 2.18;
+      const shatterRadius = isMobile ? 1.46 : 1.34;
+
+      panes.forEach((pane, index) => {
+        const data = pane.userData;
+        const t = elapsed * data.speed + data.phase;
+        const pointerDistance = pointerWorld.distanceTo(data.basePosition);
+        const reveal = Math.pow(Math.max(0, 1 - pointerDistance / revealRadius), 2);
+        const shatterTarget = reveal * (isMobile ? 0.28 : 0.36);
+        const shatterEase = shatterTarget > data.shatter ? 0.092 : 0.018;
+        data.shatter += (shatterTarget - data.shatter) * shatterEase;
+        data.shatter = THREE.MathUtils.clamp(data.shatter * 0.992, 0, 1.15);
+        const awayX = data.basePosition.x - pointerWorld.x;
+        const awayY = data.basePosition.y - pointerWorld.y;
+        const awayLength = Math.max(Math.hypot(awayX, awayY), 0.001);
+        const revealSpread = reveal * (isMobile ? 0.18 : 0.24);
+        const shatter = reducedMotion ? data.shatter * 0.18 : data.shatter;
+        const shatterSpread = shatter * (isMobile ? 0.46 : 0.68);
+        const pointerSlide = data.pointerWeight * (isMobile ? 1.45 : 1.9);
+
+        pane.position.x = data.basePosition.x
+          + Math.sin(t * 0.42) * data.drift.x
+          + pointer.x * pointerSlide
+          + (awayX / awayLength) * (revealSpread + shatterSpread);
+        pane.position.y = data.basePosition.y
+          + Math.cos(t * 0.38) * data.drift.y
+          - pointer.y * pointerSlide * 0.72
+          + (awayY / awayLength) * (revealSpread + shatterSpread * 0.84);
+        pane.position.z = data.basePosition.z
+          + Math.sin(t * 0.52 + index) * data.drift.z
+          + reveal * (isMobile ? 0.2 : 0.32)
+          + shatter * (isMobile ? 0.48 : 0.74);
+        pane.rotation.x = data.baseRotation.x
+          + Math.sin(t * 0.46) * data.rotationDrift.x
+          - pointer.y * data.pointerWeight * 1.15
+          + reveal * (awayY / awayLength) * 0.16
+          + shatter * (awayY / awayLength) * (isMobile ? 0.38 : 0.58);
+        pane.rotation.y = data.baseRotation.y
+          + Math.cos(t * 0.43) * data.rotationDrift.y
+          + pointer.x * data.pointerWeight * 1.38
+          - reveal * (awayX / awayLength) * 0.2
+          - shatter * (awayX / awayLength) * (isMobile ? 0.44 : 0.66);
+        pane.rotation.z = data.baseRotation.z
+          + Math.sin(t * 0.34) * data.rotationDrift.z
+          + reveal * Math.sin(t + index) * 0.028
+          + shatter * (data.radial.x * awayY - data.radial.y * awayX) * 0.18;
+        updatePaneMaterials(data);
+      });
+
+      updateSplinters(dt);
+      updateShockRings(dt);
+      edgeLight.position.x = 3.1 + pointer.x * 0.9;
+      edgeLight.position.y = 1.4 + pointer.y * 0.55;
+      warmLight.position.x = -4.4 - pointer.x * 0.65;
+      composer.grainPass.uniforms.time.value = elapsed;
+      composer.pipeline.render();
+      requestAnimationFrame(render);
+    }
+  </script>
+</body>
+</html>
