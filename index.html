@@ -121,7 +121,7 @@
       top: clamp(14px, 3vw, 28px);
       left: clamp(16px, 4vw, 44px);
       right: clamp(16px, 4vw, 44px);
-      z-index: 4;
+      z-index: 6;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -131,13 +131,8 @@
       color: rgba(248, 248, 251, 0.78);
     }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
     .site-nav a,
+    .site-nav button,
     .launch-actions a,
     .github-link {
       pointer-events: auto;
@@ -149,17 +144,21 @@
       backdrop-filter: blur(12px);
     }
 
-    .site-nav a {
+    .site-nav a,
+    .site-nav button {
       padding: 9px 12px;
+      font: inherit;
+      cursor: pointer;
     }
 
     .launch-copy {
       position: fixed;
-      left: clamp(18px, 6vw, 72px);
-      bottom: clamp(18px, 5vh, 52px);
+      left: 50%;
+      bottom: clamp(16px, 3.5vh, 28px);
+      transform: translateX(-50%);
       z-index: 4;
-      width: min(460px, calc(100vw - 36px));
-      padding: clamp(14px, 2.4vw, 20px);
+      width: min(300px, calc(100vw - 36px));
+      padding: clamp(8px, 1.4vw, 11px) clamp(10px, 1.8vw, 13px);
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 8px;
       background:
@@ -170,8 +169,9 @@
         inset 0 -18px 44px rgba(142, 219, 255, 0.07),
         0 18px 70px rgba(0, 0, 0, 0.32);
       backdrop-filter: blur(18px) saturate(145%);
-      pointer-events: auto;
+      pointer-events: none;
       overflow: hidden;
+      text-align: center;
     }
 
     .launch-copy::before {
@@ -192,16 +192,18 @@
     }
 
     .launch-copy p {
-      margin: 0 0 12px;
-      color: rgba(248, 248, 251, 0.68);
-      font-size: clamp(0.82rem, 1.5vw, 0.96rem);
+      margin: 0 0 4px;
+      color: rgba(248, 248, 251, 0.62);
+      font-size: clamp(0.6rem, 0.9vw, 0.68rem);
+      font-weight: 720;
+      text-transform: uppercase;
     }
 
     .launch-copy h2 {
       margin: 0;
-      max-width: 14ch;
-      font-size: clamp(1.82rem, 4.8vw, 3.85rem);
-      line-height: 0.94;
+      max-width: none;
+      font-size: clamp(1.04rem, 2.25vw, 1.82rem);
+      line-height: 0.98;
       color: rgba(255, 255, 255, 0.96);
     }
 
@@ -219,10 +221,12 @@
 
     .contact-panel {
       position: fixed;
-      right: clamp(18px, 5vw, 72px);
-      bottom: clamp(24px, 8vh, 82px);
-      z-index: 4;
-      width: min(396px, calc(100vw - 36px));
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 7;
+      width: min(420px, calc(100vw - 28px));
+      max-height: min(78vh, 640px);
       padding: 18px;
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 8px;
@@ -233,6 +237,34 @@
       backdrop-filter: blur(22px) saturate(130%);
       pointer-events: auto;
       touch-action: pan-y;
+      overflow-y: auto;
+    }
+
+    .contact-panel[hidden],
+    .contact-backdrop[hidden] {
+      display: none;
+    }
+
+    .contact-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      background: rgba(3, 4, 7, 0.24);
+      backdrop-filter: blur(8px);
+      pointer-events: auto;
+    }
+
+    .close-contact {
+      float: right;
+      margin: -4px -4px 6px 12px;
+      padding: 7px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.86);
+      font: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
     }
 
     .contact-panel * {
@@ -385,21 +417,18 @@
         right: 14px;
       }
 
-      .nav-links {
-        gap: 8px;
-      }
-
-      .site-nav a {
+      .site-nav a,
+      .site-nav button {
         padding: 8px 9px;
         font-size: 0.78rem;
       }
 
       .launch-copy {
-        top: 86px;
-        bottom: auto;
-        left: 16px;
-        width: calc(100vw - 36px);
-        padding: 12px;
+        top: auto;
+        bottom: 18px;
+        left: 50%;
+        width: min(292px, calc(100vw - 42px));
+        padding: 8px 10px;
       }
 
       .launch-copy p {
@@ -407,35 +436,20 @@
       }
 
       .launch-copy h2 {
-        max-width: 16ch;
-        font-size: clamp(1.42rem, 7.8vw, 2.25rem);
-      }
-
-      .launch-actions {
-        margin-top: 12px;
-      }
-
-      .launch-actions a {
-        padding: 10px 12px;
-        font-size: 0.86rem;
+        font-size: clamp(1rem, 4.8vw, 1.38rem);
       }
 
       .contact-panel {
-        left: 14px;
-        right: 14px;
-        bottom: 12px;
-        width: auto;
-        max-height: 51vh;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        width: min(362px, calc(100vw - 28px));
+        max-height: 78vh;
         padding: 14px;
-        overflow-y: auto;
       }
 
       .contact-panel h3 {
         font-size: 1.1rem;
-      }
-
-      .contact-panel p {
-        display: none;
       }
 
       .field-row {
@@ -472,11 +486,8 @@
 </head>
 <body>
   <nav class="site-nav" aria-label="Bles Software">
-    <span>Bles Software</span>
-    <div class="nav-links">
-      <a href="https://github.com/stas4000/liquid-glass-paralax" target="_blank" rel="noreferrer">GitHub</a>
-      <a href="#contact">Contact</a>
-    </div>
+    <a href="https://github.com/stas4000/liquid-glass-paralax" target="_blank" rel="noreferrer">GitHub</a>
+    <button type="button" data-open-contact>Contact Us</button>
   </nav>
   <div class="source" id="source" aria-hidden="true">
     <div class="copy">
@@ -486,14 +497,12 @@
 
   <canvas id="stage" aria-label="Fractured liquid glass revealing static typography"></canvas>
   <section class="launch-copy" aria-label="Liquid glass parallax">
-    <p>Built with Telecladius on Three.js</p>
-    <h2>Liquid glass for modern web interfaces.</h2>
-    <div class="launch-actions">
-      <a href="#contact">Start a project</a>
-      <a href="https://github.com/stas4000/liquid-glass-paralax" target="_blank" rel="noreferrer">Open source code</a>
-    </div>
+    <p>Telecladius × Three.js</p>
+    <h2>Liquid Glass Design</h2>
   </section>
-  <aside class="contact-panel" id="contact" aria-label="Contact Bles Software">
+  <div class="contact-backdrop" id="contact-backdrop" hidden></div>
+  <aside class="contact-panel" id="contact" aria-label="Contact Bles Software" hidden>
+    <button class="close-contact" type="button" data-close-contact>Close</button>
     <div class="panel-kicker">Bles Software build desk</div>
     <h3>Want this kind of interface or automation?</h3>
     <p>Tell us what you want to build. We handle liquid glass interfaces, AI integrations, Teleclaudious access, and custom build orders.</p>
@@ -540,6 +549,32 @@
   <script>
     const leadForm = document.getElementById('lead-form');
     const leadStatus = document.getElementById('form-status');
+    const contactPanel = document.getElementById('contact');
+    const contactBackdrop = document.getElementById('contact-backdrop');
+    const openContactButtons = document.querySelectorAll('[data-open-contact]');
+    const closeContactButtons = document.querySelectorAll('[data-close-contact]');
+
+    function openContact() {
+      contactPanel.hidden = false;
+      contactBackdrop.hidden = false;
+      setTimeout(() => contactPanel.querySelector('input[name="name"]')?.focus(), 40);
+    }
+
+    function closeContact() {
+      contactPanel.hidden = true;
+      contactBackdrop.hidden = true;
+    }
+
+    openContactButtons.forEach((button) => {
+      button.addEventListener('click', openContact);
+    });
+    closeContactButtons.forEach((button) => {
+      button.addEventListener('click', closeContact);
+    });
+    contactBackdrop?.addEventListener('click', closeContact);
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !contactPanel.hidden) closeContact();
+    });
 
     leadForm?.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -548,6 +583,7 @@
       const contact = String(data.contact || '').trim();
       if (contact.includes('@')) data.email = contact;
       else data.phone = contact;
+      data.interest = leadForm.querySelector('select[name="inquiryType"]')?.selectedOptions[0]?.textContent || data.inquiryType;
       data.source = 'telecladius-liquid-glass';
       data.page = window.location.href;
 
