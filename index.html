@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#030407">
   <link rel="icon" href="data:,">
-  <title>Liquid Glass Parallax | Bles Software</title>
-  <meta name="description" content="A live Three.js liquid glass interface demo by Bles Software, built with Telecladius.">
+  <title>Liquid Glass Parallax</title>
+  <meta name="description" content="A live Three.js liquid glass parallax animation demo built with Telecladius.">
   <style>
     :root {
       color-scheme: dark;
@@ -132,9 +132,7 @@
     }
 
     .site-nav a,
-    .site-nav button,
-    .launch-actions a,
-    .github-link {
+    .launch-actions a {
       pointer-events: auto;
       color: #fff;
       text-decoration: none;
@@ -144,8 +142,7 @@
       backdrop-filter: blur(12px);
     }
 
-    .site-nav a,
-    .site-nav button {
+    .site-nav a {
       padding: 9px 12px;
       font: inherit;
       cursor: pointer;
@@ -219,178 +216,6 @@
       font-size: 0.92rem;
     }
 
-    .contact-panel {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 7;
-      width: min(420px, calc(100vw - 28px));
-      max-height: min(78vh, 640px);
-      padding: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 8px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
-        var(--panel);
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
-      backdrop-filter: blur(22px) saturate(130%);
-      pointer-events: auto;
-      touch-action: pan-y;
-      overflow-y: auto;
-    }
-
-    .contact-panel[hidden],
-    .contact-backdrop[hidden] {
-      display: none;
-    }
-
-    .contact-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 5;
-      background: rgba(3, 4, 7, 0.24);
-      backdrop-filter: blur(8px);
-      pointer-events: auto;
-    }
-
-    .close-contact {
-      float: right;
-      margin: -4px -4px 6px 12px;
-      padding: 7px 9px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      color: rgba(255, 255, 255, 0.86);
-      font: inherit;
-      font-size: 0.78rem;
-      cursor: pointer;
-    }
-
-    .contact-panel * {
-      letter-spacing: 0;
-    }
-
-    .panel-kicker {
-      margin-bottom: 8px;
-      color: rgba(142, 219, 255, 0.92);
-      font-size: 0.76rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .contact-panel h3 {
-      margin: 0;
-      color: var(--accent-strong);
-      font-size: clamp(1.18rem, 2vw, 1.46rem);
-      line-height: 1.08;
-    }
-
-    .contact-panel p {
-      margin: 8px 0 14px;
-      color: rgba(248, 248, 251, 0.68);
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-
-    .lead-form {
-      display: grid;
-      gap: 10px;
-    }
-
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .lead-form label {
-      display: grid;
-      gap: 6px;
-      color: rgba(248, 248, 251, 0.72);
-      font-size: 0.76rem;
-      font-weight: 650;
-    }
-
-    .lead-form input,
-    .lead-form select,
-    .lead-form textarea {
-      width: 100%;
-      min-height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 6px;
-      background: var(--field);
-      color: #fff;
-      outline: none;
-      padding: 10px 11px;
-      font: inherit;
-      font-size: 0.88rem;
-      user-select: text;
-      -webkit-user-select: text;
-      touch-action: manipulation;
-    }
-
-    .lead-form textarea {
-      min-height: 78px;
-      resize: vertical;
-      touch-action: pan-y;
-    }
-
-    .lead-form input::placeholder,
-    .lead-form textarea::placeholder {
-      color: rgba(248, 248, 251, 0.38);
-    }
-
-    .lead-form input:focus,
-    .lead-form select:focus,
-    .lead-form textarea:focus {
-      border-color: rgba(142, 219, 255, 0.72);
-      box-shadow: 0 0 0 3px rgba(142, 219, 255, 0.14);
-    }
-
-    .lead-form button {
-      min-height: 44px;
-      border: 0;
-      border-radius: 6px;
-      background: linear-gradient(135deg, #ffffff, #9fe4ff);
-      color: #05070b;
-      font: inherit;
-      font-size: 0.92rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .lead-form button:disabled {
-      opacity: 0.68;
-      cursor: wait;
-    }
-
-    .form-status {
-      min-height: 18px;
-      margin: 0;
-      color: rgba(248, 248, 251, 0.74);
-      font-size: 0.78rem;
-    }
-
-    .bot-field {
-      position: absolute;
-      left: -10000px;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-    }
-
-    .github-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 12px;
-      padding: 10px 12px;
-      font-size: 0.86rem;
-      color: rgba(255, 255, 255, 0.9);
-      background: rgba(255, 255, 255, 0.07);
-    }
-
     body.no-webgl #stage {
       display: none;
     }
@@ -417,8 +242,7 @@
         right: 14px;
       }
 
-      .site-nav a,
-      .site-nav button {
+      .site-nav a {
         padding: 8px 9px;
         font-size: 0.78rem;
       }
@@ -438,40 +262,6 @@
       .launch-copy h2 {
         font-size: clamp(1rem, 4.8vw, 1.38rem);
       }
-
-      .contact-panel {
-        left: 50%;
-        right: auto;
-        bottom: auto;
-        width: min(362px, calc(100vw - 28px));
-        max-height: 78vh;
-        padding: 14px;
-      }
-
-      .contact-panel h3 {
-        font-size: 1.1rem;
-      }
-
-      .field-row {
-        grid-template-columns: 1fr;
-        gap: 9px;
-      }
-
-      .lead-form {
-        gap: 9px;
-      }
-
-      .lead-form input,
-      .lead-form select,
-      .lead-form textarea {
-        min-height: 39px;
-        padding: 8px 10px;
-        font-size: 0.84rem;
-      }
-
-      .lead-form textarea {
-        min-height: 58px;
-      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -485,13 +275,12 @@
   </script>
 </head>
 <body>
-  <nav class="site-nav" aria-label="Bles Software">
+  <nav class="site-nav" aria-label="Project">
     <a href="https://github.com/stas4000/liquid-glass-paralax" target="_blank" rel="noreferrer">GitHub</a>
-    <button type="button" data-open-contact>Contact Us</button>
   </nav>
   <div class="source" id="source" aria-hidden="true">
     <div class="copy">
-      <h1>Bles Software Design</h1>
+      <h1>Liquid Glass Design</h1>
     </div>
   </div>
 
@@ -500,115 +289,12 @@
     <p>Telecladius × Three.js</p>
     <h2>Liquid Glass Design</h2>
   </section>
-  <div class="contact-backdrop" id="contact-backdrop" hidden></div>
-  <aside class="contact-panel" id="contact" aria-label="Contact Bles Software" hidden>
-    <button class="close-contact" type="button" data-close-contact>Close</button>
-    <div class="panel-kicker">Bles Software build desk</div>
-    <h3>Want this kind of interface or automation?</h3>
-    <p>Tell us what you want to build. We handle liquid glass interfaces, AI integrations, Teleclaudious access, and custom build orders.</p>
-    <form class="lead-form" id="lead-form">
-      <label class="bot-field">
-        <span>Website</span>
-        <input name="website" autocomplete="off" tabindex="-1">
-      </label>
-      <div class="field-row">
-        <label>
-          <span>Name</span>
-          <input name="name" autocomplete="name" placeholder="Your name" required>
-        </label>
-        <label>
-          <span>Email or phone</span>
-          <input name="contact" autocomplete="email" placeholder="How to reach you" required>
-        </label>
-      </div>
-      <label>
-        <span>Inquiry</span>
-        <select name="inquiryType" required>
-          <option value="liquid-glass">Liquid glass interface</option>
-          <option value="ai-integrations">AI integrations</option>
-          <option value="teleclaudious-access">Teleclaudious access</option>
-          <option value="custom-build">Custom build order</option>
-        </select>
-      </label>
-      <label>
-        <span>Project details</span>
-        <textarea name="details" placeholder="A few words about the project, timeline, or stack." required></textarea>
-      </label>
-      <button type="submit">Send request</button>
-      <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
-    </form>
-    <a class="github-link" href="https://github.com/stas4000/liquid-glass-paralax" target="_blank" rel="noreferrer">Grab the open-source repo</a>
-  </aside>
   <div class="fallback">
     <div>
       <strong>GPU glass unavailable</strong>
       This browser could not start the live refractive typography scene.
     </div>
   </div>
-
-  <script>
-    const leadForm = document.getElementById('lead-form');
-    const leadStatus = document.getElementById('form-status');
-    const contactPanel = document.getElementById('contact');
-    const contactBackdrop = document.getElementById('contact-backdrop');
-    const openContactButtons = document.querySelectorAll('[data-open-contact]');
-    const closeContactButtons = document.querySelectorAll('[data-close-contact]');
-
-    function openContact() {
-      contactPanel.hidden = false;
-      contactBackdrop.hidden = false;
-      setTimeout(() => contactPanel.querySelector('input[name="name"]')?.focus(), 40);
-    }
-
-    function closeContact() {
-      contactPanel.hidden = true;
-      contactBackdrop.hidden = true;
-    }
-
-    openContactButtons.forEach((button) => {
-      button.addEventListener('click', openContact);
-    });
-    closeContactButtons.forEach((button) => {
-      button.addEventListener('click', closeContact);
-    });
-    contactBackdrop?.addEventListener('click', closeContact);
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !contactPanel.hidden) closeContact();
-    });
-
-    leadForm?.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const submitButton = leadForm.querySelector('button[type="submit"]');
-      const data = Object.fromEntries(new FormData(leadForm).entries());
-      const contact = String(data.contact || '').trim();
-      if (contact.includes('@')) data.email = contact;
-      else data.phone = contact;
-      data.interest = leadForm.querySelector('select[name="inquiryType"]')?.selectedOptions[0]?.textContent || data.inquiryType;
-      data.source = 'telecladius-liquid-glass';
-      data.page = window.location.href;
-
-      leadStatus.textContent = 'Sending...';
-      submitButton.disabled = true;
-
-      try {
-        const response = await fetch('/api/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok || !payload.ok) {
-          throw new Error(payload.error || 'Request failed');
-        }
-        leadForm.reset();
-        leadStatus.textContent = 'Received. We will get back to you shortly.';
-      } catch (error) {
-        leadStatus.textContent = 'Could not send here. Email info@bles-software.com.';
-      } finally {
-        submitButton.disabled = false;
-      }
-    });
-  </script>
 
   <script type="module">
     import * as THREE from 'three';
@@ -773,7 +459,7 @@
       ctx.fillStyle = base;
       ctx.fillRect(0, 0, width, height);
 
-      const text = 'Bles Software Design';
+      const text = 'Liquid Glass Design';
       let fontSize = Math.floor(Math.min(width / 7.4, height / 3.8));
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
